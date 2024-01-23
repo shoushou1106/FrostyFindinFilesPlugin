@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
-using SearchPlugin.Extensions;
+using FindinFilesPlugin.Extensions;
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
@@ -22,8 +22,8 @@ using SearchPlugin.Extensions;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("c81af64d-2715-0020-0638-75ab8fdb2e99")]
 
-[assembly: PluginDisplayName("Search")]
+[assembly: PluginDisplayName("FindinFiles")]
 [assembly: PluginAuthor("shoushou1106")]
 [assembly: PluginVersion("1.0.0.0")]
 
-[assembly: RegisterMenuExtension(typeof(SearchMenuExtension))]
+[assembly: RegisterMenuExtension(typeof(FindinFilesMenuExtension))]

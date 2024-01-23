@@ -1,1 +1,1 @@
-# FrostySearchPlugin
+# FrostyFindinFilesPlugin
