@@ -7,7 +7,8 @@
         xmlns:core="clr-namespace:Frosty.Core.Controls;assembly=FrostyCore"
         xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
         mc:Ignorable="d"
-        Title="Find in Files" Height="450" Width="450"
+        Title="Find in Files" Height="450" MinHeight="450" Width="450"
+        SizeToContent="Height"
         x:Name="FindinFilesWindows">
     
     <Window.Resources>
@@ -24,8 +25,6 @@
             <RowDefinition Height="38"/>
         </Grid.RowDefinitions>
 
-        <ctrl:FrostySpinner x:Name="debugSpinner" Visibility="Hidden"/>
-
         <!-- Main Content -->
         <StackPanel Grid.Row="0" Margin="5">
             <!-- Basic search settings -->
@@ -34,16 +33,16 @@
                 <Label x:Name="Find_TextBox_Watermark" Margin="2.5, 0, 0, 0" Content="Find" VerticalAlignment="Center" Opacity="0.5" IsHitTestVisible="False" Visibility="Visible"/>
             </Grid>
             <DockPanel LastChildFill="True">
-                <CheckBox Margin="1" VerticalAlignment="Center"/>
+                <CheckBox x:Name="isCaseSensitive" Margin="1" VerticalAlignment="Center"/>
                 <Label Content="Match case"/>
             </DockPanel>
             <DockPanel LastChildFill="True">
-                <CheckBox Margin="1" VerticalAlignment="Center"/>
+                <CheckBox x:Name="isMatchWholeWord" Margin="1" VerticalAlignment="Center"/>
                 <Label Content="Match whole word"/>
             </DockPanel>
             <DockPanel LastChildFill="True">
-                <CheckBox Margin="1" VerticalAlignment="Center"/>
-                <Label Content="Use regular experssions"/>
+                <CheckBox x:Name="isRegularExpressions" Margin="1" VerticalAlignment="Center"/>
+                <Label Content="Use regular expressions"/>
                 <TextBlock Foreground="{StaticResource FontColor}" Opacity="0.5" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="5">
                         Learn more at: 
                         <Hyperlink NavigateUri="https://learn.microsoft.com/dotnet/standard/base-types/regular-expression-language-quick-reference" RequestNavigate="Hyperlink_RequestNavigate">Microsoft</Hyperlink>
@@ -89,8 +88,11 @@
         
         <!-- Bottom bar -->
         <DockPanel Grid.Row="1" LastChildFill="False" Background="{StaticResource WindowBackground}">
-            <Button x:Name="SearchButton" DockPanel.Dock="Right" Margin="8" Width="50" Content="Search" Click="SearchButton_Click"/>
-                <!-- Always on top -->
+            <Button x:Name="FindAllButton" DockPanel.Dock="Right" Margin="5, 8, 5, 8" Width="60" Content="Find All" Click="FindAllButton_Click"/>
+            <Button x:Name="FindNextButton" DockPanel.Dock="Right" Margin="5, 8, 5, 8" Width="65" Content="Find Next" Click="FindAllButton_Click"/>
+            <Button x:Name="ExportButton" DockPanel.Dock="Right" Margin="5, 8, 5, 8" Width="80" Content="Export to file" Click="ExportButton_Click"/>
+
+            <!-- Always on top -->
             <ToggleButton Margin="8" Width="100" DockPanel.Dock="Left" Content="Always On Top" IsChecked="{Binding ElementName=FindinFilesWindows, Path=Topmost}"/>
         </DockPanel>
         
