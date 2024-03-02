@@ -91,6 +91,7 @@ namespace FindinFilesPlugin.Windows
         private void FindNextButton_Click(object sender, RoutedEventArgs e)
         {
             GC.Collect();
+
             try
             {
                 FrostyTaskWindow.Show(this, Find_TextBox.Text, "Finding", (task) =>
@@ -104,6 +105,7 @@ namespace FindinFilesPlugin.Windows
             {
                 FrostyExceptionBox.Show(ex, "Find in Files Plugin");
             }
+
             GC.Collect();
         }
 
@@ -131,7 +133,7 @@ namespace FindinFilesPlugin.Windows
                 {
                     foreach (EbxAssetEntry entry in ResultAssetListView.ItemsSource)
                     {
-                        writer.WriteLine(entry.Filename);
+                        writer.WriteLine(entry.Path + entry.Filename);
                     }
                 }
             }
