@@ -22,8 +22,8 @@ using FindinFilesPlugin.Extensions;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("c81af64d-2715-0020-0638-75ab8fdb2e99")]
 
-[assembly: PluginDisplayName("FindinFiles")]
+[assembly: PluginDisplayName("Find in Files")]
 [assembly: PluginAuthor("shoushou1106")]
-[assembly: PluginVersion("1.0.0.0")]
+[assembly: PluginVersion("0.1.3.0")]
 
 [assembly: RegisterMenuExtension(typeof(FindinFilesMenuExtension))]

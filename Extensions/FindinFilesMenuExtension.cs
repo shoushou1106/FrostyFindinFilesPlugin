@@ -10,7 +10,7 @@ namespace FindinFilesPlugin.Extensions
         public override string TopLevelMenuName => "Tools";
 
         // The name of the menu item.
-        public override string MenuItemName => "FindinFiles";
+        public override string MenuItemName => "Find in Files";
 
         // The action to perform when the menu item is clicked
         public override RelayCommand MenuItemClicked => new RelayCommand((o) =>

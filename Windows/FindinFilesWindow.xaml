@@ -4,9 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FindinFilesPlugin.Windows"
+        xmlns:core="clr-namespace:Frosty.Core.Controls;assembly=FrostyCore"
         xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
         mc:Ignorable="d"
-        Title="FindinFiles" Height="450" Width="450">
+        Title="Find in Files" Height="450" Width="450"
+        x:Name="FindinFilesWindows">
     
     <Window.Resources>
         <ResourceDictionary>
@@ -17,6 +19,80 @@
     </Window.Resources>
 
     <Grid Background="{StaticResource ListBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="38"/>
+        </Grid.RowDefinitions>
+
+        <ctrl:FrostySpinner x:Name="debugSpinner" Visibility="Hidden"/>
+
+        <!-- Main Content -->
+        <StackPanel Grid.Row="0" Margin="5">
+            <!-- Basic search settings -->
+            <Grid>
+                <TextBox x:Name="Find_TextBox" Margin="2" BorderThickness="1" MinHeight="25" TextChanged="Find_TextBox_TextChanged"/>
+                <Label x:Name="Find_TextBox_Watermark" Margin="2.5, 0, 0, 0" Content="Find" VerticalAlignment="Center" Opacity="0.5" IsHitTestVisible="False" Visibility="Visible"/>
+            </Grid>
+            <DockPanel LastChildFill="True">
+                <CheckBox Margin="1" VerticalAlignment="Center"/>
+                <Label Content="Match case"/>
+            </DockPanel>
+            <DockPanel LastChildFill="True">
+                <CheckBox Margin="1" VerticalAlignment="Center"/>
+                <Label Content="Match whole word"/>
+            </DockPanel>
+            <DockPanel LastChildFill="True">
+                <CheckBox Margin="1" VerticalAlignment="Center"/>
+                <Label Content="Use regular experssions"/>
+                <TextBlock Foreground="{StaticResource FontColor}" Opacity="0.5" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="5">
+                        Learn more at: 
+                        <Hyperlink NavigateUri="https://learn.microsoft.com/dotnet/standard/base-types/regular-expression-language-quick-reference" RequestNavigate="Hyperlink_RequestNavigate">Microsoft</Hyperlink>
+                        or
+                        <Hyperlink NavigateUri="https://www.wikipedia.org/wiki/Regular_expression" RequestNavigate="Hyperlink_RequestNavigate">Wikipedia</Hyperlink>
+                </TextBlock>
+            </DockPanel>
+
+            <!-- File type -->
+            <!-- I have this idea but I don't know how to implement it. If you are interested you can submit a PR on GitHub or contact Discord: shoushou1106 -->
+            <DockPanel LastChildFill="True"                                 IsEnabled="False"       >
+                <Label Content="File types" Width="75"/>
+                <WrapPanel Margin="1">
+                    <DockPanel LastChildFill="True" Margin="2.5">
+                        <CheckBox Margin="1" VerticalAlignment="Center"     IsChecked="True"        />
+                        <TextBlock Margin="2" Text="Ebx" Foreground="{StaticResource FontColor}"/>
+                    </DockPanel>
+                    <DockPanel LastChildFill="True" Margin="2.5"            IsEnabled="False"       >
+                        <CheckBox Margin="1" VerticalAlignment="Center"/>
+                        <TextBlock Margin="2" Text="Res" Foreground="{StaticResource FontColor}"/>
+                    </DockPanel>
+                    <DockPanel LastChildFill="True" Margin="2.5"            IsEnabled="False"       >
+                        <CheckBox Margin="1" VerticalAlignment="Center"/>
+                        <TextBlock Margin="2" Text="Chunk" Foreground="{StaticResource FontColor}"/>
+                    </DockPanel>
+                    <DockPanel LastChildFill="True" Margin="2.5"            IsEnabled="False"       >
+                        <CheckBox Margin="1" VerticalAlignment="Center"/>
+                        <TextBlock Margin="2" Text="Bundle" Foreground="{StaticResource FontColor}"/>
+                    </DockPanel>
+                </WrapPanel>
+            </DockPanel>
+
+            <!-- Result list -->
+            <core:FrostyAssetListView x:Name="ResultAssetListView" Grid.Row="1" Margin="0 0 3 0" BorderThickness="1" BorderBrush="{StaticResource WindowBackground}" >
+                <core:FrostyAssetListView.AssetContextMenu>
+                    <ContextMenu>
+                        <MenuItem x:Name="ResultAssetListOpenItem" Header="Open asset" Click="ResultAssetListOpenItem_Click"/>
+                        <MenuItem x:Name="ResultAssetListFindItem" Header="Find in data explorer" Click="ResultAssetListFindItem_Click"/>        
+                    </ContextMenu>
+                </core:FrostyAssetListView.AssetContextMenu>
+            </core:FrostyAssetListView>
+        </StackPanel>
+        
+        <!-- Bottom bar -->
+        <DockPanel Grid.Row="1" LastChildFill="False" Background="{StaticResource WindowBackground}">
+            <Button x:Name="SearchButton" DockPanel.Dock="Right" Margin="8" Width="50" Content="Search" Click="SearchButton_Click"/>
+                <!-- Always on top -->
+            <ToggleButton Margin="8" Width="100" DockPanel.Dock="Left" Content="Always On Top" IsChecked="{Binding ElementName=FindinFilesWindows, Path=Topmost}"/>
+        </DockPanel>
         
     </Grid>
 </ctrl:FrostyDockableWindow>
