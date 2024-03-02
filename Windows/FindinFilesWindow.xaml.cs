@@ -13,6 +13,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -58,6 +59,7 @@ namespace FindinFilesPlugin.Windows
 
             StringBuilder sb = new StringBuilder();
 
+            List<EbxAssetEntry> result = new List<EbxAssetEntry>();
             string searchFor = Find_TextBox.Text;
             bool caseSensitive = isCaseSensitive.IsChecked.GetValueOrDefault(false);
             bool matchWholeWord = isMatchWholeWord.IsChecked.GetValueOrDefault(false);
@@ -66,13 +68,22 @@ namespace FindinFilesPlugin.Windows
             // setup ability to cancel the process
             CancellationTokenSource cancelToken = new CancellationTokenSource();
 
+
             FrostyTaskWindow.Show(this, searchFor, "", (task) =>
             {
-                IndexLibrary.SearchAll(searchFor, cancelToken.Token, task.TaskLogger,
-                    caseSensitive,
-                    matchWholeWord,
-                    regularExpressions);
-            }/*, showCancelButton: true, cancelCallback: (task) => cancelToken.Cancel()*/);
+                try
+                {
+                    result = IndexLibrary.SearchAll(searchFor, cancelToken.Token, task.TaskLogger,
+                        caseSensitive,
+                        matchWholeWord,
+                        regularExpressions);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }, showCancelButton: true, cancelCallback: (task) => cancelToken.Cancel());
+
+            ResultAssetListView.ItemsSource = result;
 
             GC.Collect();
         }

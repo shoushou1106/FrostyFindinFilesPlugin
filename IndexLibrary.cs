@@ -62,9 +62,11 @@ namespace FindinFilesPlugin
             List<EbxAssetEntry> result = new List<EbxAssetEntry>();
             uint totalCount = (uint)App.AssetManager.EnumerateEbx().ToList().Count;
             uint index = 0;
+            cancelToken.ThrowIfCancellationRequested();
 
             foreach (EbxAssetEntry entry in App.AssetManager.EnumerateEbx())
             {
+                cancelToken.ThrowIfCancellationRequested();
                 inLogger.Log(entry.Path + entry.Name);
                 inLogger.Log("progress:" + (index++ / (double)totalCount) * 100.0d);
 
@@ -86,6 +88,7 @@ namespace FindinFilesPlugin
                     }
                 }
             }
+
             return result;
         }
 
