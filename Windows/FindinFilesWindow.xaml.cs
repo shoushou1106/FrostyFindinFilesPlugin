@@ -41,11 +41,15 @@ namespace FindinFilesPlugin.Windows
                 Find_TextBox_Watermark.Visibility = Visibility.Collapsed;
             }
 
-            IndexLibrary.SetEnumerateSearch(Find_TextBox.Text,
-                isCaseSensitive.IsChecked.GetValueOrDefault(false),
-                isMatchWholeWord.IsChecked.GetValueOrDefault(false),
-                isRegularExpressions.IsChecked.GetValueOrDefault(false));
-            resultEnumerator = IndexLibrary.EnumerateResult.GetEnumerator();
+            try
+            {
+                IndexLibrary.SetEnumerateSearch(Find_TextBox.Text,
+                    isCaseSensitive.IsChecked.GetValueOrDefault(false),
+                    isMatchWholeWord.IsChecked.GetValueOrDefault(false),
+                    isRegularExpressions.IsChecked.GetValueOrDefault(false));
+                resultEnumerator = IndexLibrary.EnumerateResult.GetEnumerator();
+            }
+            catch { }
         }
 
         private void FindAllButton_Click(object sender, RoutedEventArgs e)
@@ -55,6 +59,9 @@ namespace FindinFilesPlugin.Windows
             StringBuilder sb = new StringBuilder();
 
             string searchFor = Find_TextBox.Text;
+            bool caseSensitive = isCaseSensitive.IsChecked.GetValueOrDefault(false);
+            bool matchWholeWord = isMatchWholeWord.IsChecked.GetValueOrDefault(false);
+            bool regularExpressions = isRegularExpressions.IsChecked.GetValueOrDefault(false);
 
             // setup ability to cancel the process
             CancellationTokenSource cancelToken = new CancellationTokenSource();
@@ -62,10 +69,10 @@ namespace FindinFilesPlugin.Windows
             FrostyTaskWindow.Show(this, searchFor, "", (task) =>
             {
                 IndexLibrary.SearchAll(searchFor, cancelToken.Token, task.TaskLogger,
-                    isCaseSensitive.IsChecked.GetValueOrDefault(false),
-                    isMatchWholeWord.IsChecked.GetValueOrDefault(false),
-                    isRegularExpressions.IsChecked.GetValueOrDefault(false));
-            }, showCancelButton: true, cancelCallback: (task) => cancelToken.Cancel());
+                    caseSensitive,
+                    matchWholeWord,
+                    regularExpressions);
+            }/*, showCancelButton: true, cancelCallback: (task) => cancelToken.Cancel()*/);
 
             GC.Collect();
         }
@@ -73,14 +80,19 @@ namespace FindinFilesPlugin.Windows
         private void FindNextButton_Click(object sender, RoutedEventArgs e)
         {
             GC.Collect();
-
-            FrostyTaskWindow.Show(this, Find_TextBox.Text, "Finding", (task) =>
+            try
             {
-                resultEnumerator.MoveNext();
-            });
+                FrostyTaskWindow.Show(this, Find_TextBox.Text, "Finding", (task) =>
+                {
+                    resultEnumerator.MoveNext();
+                });
 
-            ResultAssetListView.ItemsSource = new List<EbxAssetEntry>() { resultEnumerator.Current };
-
+                ResultAssetListView.ItemsSource = new List<EbxAssetEntry>() { resultEnumerator.Current };
+            }
+            catch (Exception ex)
+            {
+                FrostyExceptionBox.Show(ex, "Find in Files Plugin");
+            }
             GC.Collect();
         }
 
@@ -113,14 +125,5 @@ namespace FindinFilesPlugin.Windows
                 }
             }
         }
-
-        /// <summary>
-        /// Handle hyperlink
-        /// </summary>
-        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
-        {
-            System.Diagnostics.Process.Start(e.Uri.ToString());
-        }
-
     }
 }

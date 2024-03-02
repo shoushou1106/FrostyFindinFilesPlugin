@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text.RegularExpressions;
 using FrostySdk.Interfaces;
+using System.Collections;
 
 namespace FindinFilesPlugin
 {
