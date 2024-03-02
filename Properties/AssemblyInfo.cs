@@ -24,6 +24,6 @@ using FindinFilesPlugin.Extensions;
 
 [assembly: PluginDisplayName("Find in Files")]
 [assembly: PluginAuthor("shoushou1106")]
-[assembly: PluginVersion("0.1.4.0")]
+[assembly: PluginVersion("0.1.4.1")]
 
 [assembly: RegisterMenuExtension(typeof(FindinFilesMenuExtension))]

@@ -71,11 +71,22 @@
         </StackPanel>
 
         <!-- Result list -->
-        <core:FrostyAssetListView x:Name="ResultAssetListView" Grid.Row="1" Margin="0 0 3 0" BorderThickness="1" BorderBrush="{StaticResource WindowBackground}" >
+        <core:FrostyAssetListView x:Name="ResultAssetListView" Grid.Row="1" Margin="0 0 3 0" BorderThickness="1" BorderBrush="{StaticResource WindowBackground}"
+                                  SelectedAssetDoubleClick="ResultAssetListOpenItem_Click">
             <core:FrostyAssetListView.AssetContextMenu>
                 <ContextMenu>
-                    <MenuItem x:Name="ResultAssetListOpenItem" Header="Open asset" Click="ResultAssetListOpenItem_Click"/>
-                    <MenuItem x:Name="ResultAssetListFindItem" Header="Find in data explorer" Click="ResultAssetListFindItem_Click"/>
+                    <MenuItem x:Name="ResultAssetListOpenItem" Header="Open asset" Click="ResultAssetListOpenItem_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/OpenAsset.png"
+                                RenderOptions.BitmapScalingMode="Fant" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="ResultAssetListFindItem" Header="Find in data explorer" Click="ResultAssetListFindItem_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/Open.png"
+                                RenderOptions.BitmapScalingMode="Fant" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </core:FrostyAssetListView.AssetContextMenu>
         </core:FrostyAssetListView>
