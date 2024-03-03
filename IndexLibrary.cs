@@ -17,6 +17,8 @@ using FrostySdk.Interfaces;
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace FindinFilesPlugin
 {  
@@ -184,18 +186,50 @@ namespace FindinFilesPlugin
             isIndexInitialized = true;
         }
 
-        public static string IndexToJson()
+        public static void IndexToJson(string fileName)
         {
             if (isIndexInitialized == false)
                 throw new ArgumentNullException();
 
-            return JsonConvert.SerializeObject(ebxAssetIndex, Formatting.Indented);
+            //return JsonConvert.SerializeObject(ebxAssetIndex, Formatting.Indented);
+
+            using (StreamWriter writer = new StreamWriter(fileName))
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
+            {
+                JsonSerializer jsonSerializer = new JsonSerializer();
+
+                jsonWriter.Formatting = Formatting.Indented;
+                jsonSerializer.Formatting = Formatting.Indented;
+
+                jsonSerializer.Serialize(jsonWriter, ebxAssetIndex);
+
+                jsonWriter.Flush();
+                jsonWriter.Close();
+            }
         }
 
-        public static void JsonToIndex(string json)
+        public static void JsonToIndex(string fileName)
         {
             ebxAssetIndex.Clear();
-            ebxAssetIndex = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(json);
+
+            //ebxAssetIndex = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(json);
+
+            using (StreamReader reader = new StreamReader(fileName))
+            using (JsonTextReader jsonReader = new JsonTextReader(reader))
+            {
+                JsonSerializer jsonSerializer = new JsonSerializer();
+
+                ebxAssetIndex = jsonSerializer.Deserialize<Dictionary<Guid, string>>(jsonReader);
+
+                jsonReader.Close();
+            }
+
+            if (ebxAssetIndex is null)
+            {
+                ebxAssetIndex = new Dictionary<Guid, string>();
+                isIndexInitialized = false;
+                return;
+            }
 
             isIndexInitialized = true;
         }

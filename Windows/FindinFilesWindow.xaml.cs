@@ -200,13 +200,9 @@ namespace FindinFilesPlugin.Windows
 
                 if (dialog.ShowDialog())
                 {
-                    task.Update("Writing json file", 50.0);
-                    using (StreamWriter writer = new StreamWriter(dialog.FileName))
-                    {
-                        writer.Write(IndexLibrary.IndexToJson());
-                    }
+                    task.Update("Writing json file");
+                    IndexLibrary.IndexToJson(dialog.FileName);
                 }
-                task.Update("Complete", 100.0);
             });
 
             GC.Collect();
@@ -224,13 +220,9 @@ namespace FindinFilesPlugin.Windows
 
                 if (dialog.ShowDialog())
                 {
-                    task.Update("Reading json file", 50.0);
-                    using (StreamReader reader = new StreamReader(dialog.FileName))
-                    {
-                        reader.ReadToEnd();
-                    }
+                    task.Update("Reading json file");
+                    IndexLibrary.JsonToIndex(dialog.FileName);
                 }
-                task.Update("Complete", 100.0);
             });
 
             UpdateUI();
