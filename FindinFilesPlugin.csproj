@@ -10,6 +10,7 @@
     <UseWPF>true</UseWPF>
     <OutputType>Library</OutputType>
     <Authors>shoushou1106</Authors>
+    <UserSecretsId>68d226d9-dbe6-4c0c-a900-71afd5187d20</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Developer - Debug|x64' ">
@@ -35,6 +36,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" >
+	  <Private>false</Private>
+	</PackageReference>
+  </ItemGroup>
   
   <ItemGroup>
 	<ProjectReference Include="..\FrostyToolsuite\FrostyHash\FrostyHash.vcxproj">

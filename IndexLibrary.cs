@@ -14,16 +14,20 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text.RegularExpressions;
 using FrostySdk.Interfaces;
-using System.Collections;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace FindinFilesPlugin
-{
+{  
     public static class IndexLibrary
     {
         public static IEnumerable<EbxAssetEntry> EnumerateResult { get; set; }
-        public static bool isInitialized { get; private set; }
+        public static bool isIndexInitialized { get; private set; }
 
-        private static Dictionary<Guid, string> ebxAssetIndex = new Dictionary<Guid, string>();
+        private static Dictionary<Guid, string> ebxAssetIndex { get; set; } = new Dictionary<Guid, string>();
+
+        #region - Search -
 
         /// <summary>
         /// Use LINQ search
@@ -33,22 +37,45 @@ namespace FindinFilesPlugin
         {
             await Task.Run(() =>
             {
-                if (isRegularExpressions)
+                if (isIndexInitialized)
                 {
-                    EnumerateResult =
-                        from entry in App.AssetManager.EnumerateEbx()
-                        where Regex.IsMatch(EbxToString(entry), Key)
-                        select entry;
+                    if (isRegularExpressions)
+                    {
+                        EnumerateResult =
+                            from entry in ebxAssetIndex
+                            where Regex.IsMatch(entry.Value, Key)
+                            select App.AssetManager.GetEbxEntry(entry.Key);
+                    }
+                    else
+                    {
+                        RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+                        string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
+
+                        EnumerateResult =
+                            from entry in ebxAssetIndex
+                            where Regex.IsMatch(entry.Value, pattern, options)
+                            select App.AssetManager.GetEbxEntry(entry.Key);
+                    }
                 }
                 else
                 {
-                    RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
-                    string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
+                    if (isRegularExpressions)
+                    {
+                        EnumerateResult =
+                            from entry in App.AssetManager.EnumerateEbx()
+                            where Regex.IsMatch(EbxToString(entry), Key)
+                            select entry;
+                    }
+                    else
+                    {
+                        RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+                        string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
 
-                    EnumerateResult =
-                        from entry in App.AssetManager.EnumerateEbx()
-                        where Regex.IsMatch(EbxToString(entry), pattern, options)
-                        select entry;
+                        EnumerateResult =
+                            from entry in App.AssetManager.EnumerateEbx()
+                            where Regex.IsMatch(EbxToString(entry), pattern, options)
+                            select entry;
+                    }
                 }
             });
         }
@@ -59,7 +86,88 @@ namespace FindinFilesPlugin
         /// <param name="Key">Search Key Word</param>
         public static List<EbxAssetEntry> SearchAll(string Key, CancellationToken cancelToken, ILogger inLogger, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions)
         {
+            cancelToken.ThrowIfCancellationRequested();
             List<EbxAssetEntry> result = new List<EbxAssetEntry>();
+
+            if (isIndexInitialized)
+            {
+                uint totalCount = (uint)ebxAssetIndex.Count;
+                uint index = 0;
+                cancelToken.ThrowIfCancellationRequested();
+
+                foreach (KeyValuePair<Guid, string> entry in ebxAssetIndex)
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+                    inLogger.Log(entry.Key.ToString());
+                    inLogger.Log("progress:" + (index++ / (double)totalCount) * 100.0d);
+
+                    if (isRegularExpressions)
+                    {
+                        if (Regex.IsMatch(entry.Value, Key))
+                        {
+                            result.Add(App.AssetManager.GetEbxEntry(entry.Key));
+                        }
+                    }
+                    else
+                    {
+                        RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+                        string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
+
+                        if (Regex.IsMatch(entry.Value, pattern, options))
+                        {
+                            result.Add(App.AssetManager.GetEbxEntry(entry.Key));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                uint totalCount = (uint)App.AssetManager.EnumerateEbx().ToList().Count;
+                uint index = 0;
+                cancelToken.ThrowIfCancellationRequested();
+
+                foreach (EbxAssetEntry entry in App.AssetManager.EnumerateEbx())
+                {
+                    cancelToken.ThrowIfCancellationRequested();
+                    inLogger.Log(entry.Name);
+                    inLogger.Log("progress:" + (index++ / (double)totalCount) * 100.0d);
+
+                    if (isRegularExpressions)
+                    {
+                        if (Regex.IsMatch(EbxToString(entry), Key))
+                        {
+                            result.Add(entry);
+                        }
+                    }
+                    else
+                    {
+                        RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
+                        string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
+
+                        if (Regex.IsMatch(EbxToString(entry), pattern, options))
+                        {
+                            result.Add(entry);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region - Index -
+
+        public static void InitializeIndex(CancellationToken cancelToken, ILogger inLogger)
+        {
+            ebxAssetIndex.Clear();
+
+            if (isIndexInitialized)
+            {
+                isIndexInitialized = false;
+                return; 
+            }
             uint totalCount = (uint)App.AssetManager.EnumerateEbx().ToList().Count;
             uint index = 0;
             cancelToken.ThrowIfCancellationRequested();
@@ -67,30 +175,34 @@ namespace FindinFilesPlugin
             foreach (EbxAssetEntry entry in App.AssetManager.EnumerateEbx())
             {
                 cancelToken.ThrowIfCancellationRequested();
-                inLogger.Log(entry.Path + entry.Name);
+                inLogger.Log(entry.Name);
                 inLogger.Log("progress:" + (index++ / (double)totalCount) * 100.0d);
 
-                if (isRegularExpressions)
-                {
-                    if (Regex.IsMatch(EbxToString(entry), Key)) 
-                    {
-                        result.Add(entry);
-                    }
-                }
-                else
-                {
-                    RegexOptions options = isCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
-                    string pattern = isMatchWholeWord ? $@"\b{Key}\b" : Key;
-
-                    if (Regex.IsMatch(EbxToString(entry), pattern, options))
-                    {
-                        result.Add(entry);
-                    }
-                }
+                ebxAssetIndex.Add(entry.Guid, EbxToString(entry));
             }
 
-            return result;
+            isIndexInitialized = true;
         }
+
+        public static string IndexToJson()
+        {
+            if (isIndexInitialized == false)
+                throw new ArgumentNullException();
+
+            return JsonConvert.SerializeObject(ebxAssetIndex, Formatting.Indented);
+        }
+
+        public static void JsonToIndex(string json)
+        {
+            ebxAssetIndex.Clear();
+            ebxAssetIndex = JsonConvert.DeserializeObject<Dictionary<Guid, string>>(json);
+
+            isIndexInitialized = true;
+        }
+
+        #endregion
+
+        #region - Convert -
 
         /// <summary>
         /// Convert EbxAssetEntry to string
@@ -148,7 +260,8 @@ namespace FindinFilesPlugin
                     if (PI.GetCustomAttribute<IsTransientAttribute>() != null)
                         continue;
 
-                    SB.Append(PI.Name + "[AddInfo]");
+                    SB.AppendLine(PI.Name);
+                    SB.AppendLine("[AddInfo]");
 
                     object Value = PI.GetValue(Obj);
                     string Tmp = "";
@@ -179,7 +292,7 @@ namespace FindinFilesPlugin
             if (FieldType.Name == "List`1")
             {
                 int Count = (int)FieldType.GetMethod("get_Count").Invoke(Value, null);
-                AdditionalInfo = Count.ToString() + Environment.NewLine;
+                AdditionalInfo = Count.ToString();
 
                 if (Count > 0)
                 {
@@ -187,7 +300,7 @@ namespace FindinFilesPlugin
 
                     for (int i = 0; i < Count; i++)
                     {
-                        SB.Append(i.ToString());
+                        SB.AppendLine(i.ToString());
 
                         object SubValue = FieldType.GetMethod("get_Item").Invoke(Value, new object[] { i });
                         string Tmp = "";
@@ -202,11 +315,11 @@ namespace FindinFilesPlugin
             {
                 if (FieldType.Namespace == "FrostySdk.Ebx" && FieldType.BaseType != typeof(Enum))
                 {
-                    if (FieldType == typeof(CString)) SB.Append(Value.ToString());
-                    else if (FieldType == typeof(ResourceRef)) SB.Append(Value.ToString());
-                    else if (FieldType == typeof(FileRef)) SB.Append(Value.ToString());
-                    else if (FieldType == typeof(TypeRef)) SB.Append(Value.ToString());
-                    else if (FieldType == typeof(BoxedValueRef)) SB.Append(Value.ToString());
+                    if (FieldType == typeof(CString)) SB.AppendLine(Value.ToString());
+                    else if (FieldType == typeof(ResourceRef)) SB.AppendLine(Value.ToString());
+                    else if (FieldType == typeof(FileRef)) SB.AppendLine(Value.ToString());
+                    else if (FieldType == typeof(TypeRef)) SB.AppendLine(Value.ToString());
+                    else if (FieldType == typeof(BoxedValueRef)) SB.AppendLine(Value.ToString());
                     else if (FieldType == typeof(PointerRef))
                     {
                         PointerRef Reference = (PointerRef)Value;
@@ -214,34 +327,35 @@ namespace FindinFilesPlugin
                         {
                             Type SubObjType = Reference.Internal.GetType();
                             AssetClassGuid guid = (AssetClassGuid)SubObjType.GetField("__Guid", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(Reference.Internal);
-                            SB.Append("[" + SubObjType.Name + "] " + guid.ToString());
+                            SB.AppendLine(SubObjType.Name);
+                            SB.AppendLine(guid.ToString());
                         }
                         else if (Reference.Type == PointerRefType.External)
                         {
                             EbxAssetEntry entry = App.AssetManager.GetEbxEntry(Reference.External.FileGuid);
                             if (entry != null)
                             {
-                                SB.Append("[Ebx] " + entry.Name + " [" + Reference.External.ClassGuid + "]");
+                                SB.AppendLine(entry.Name);
+                                SB.AppendLine(Reference.External.ClassGuid.ToString());
                             }
                             else
                             {
-                                SB.Append("[Ebx] BadRef " + Reference.External.FileGuid + "/" + Reference.External.ClassGuid);
+                                SB.AppendLine("BadRef " + Reference.External.FileGuid + "/" + Reference.External.ClassGuid);
                             }
                         }
                         else
-                            SB.Append("nullptr");
+                            SB.AppendLine("nullptr");
                     }
                     else
                     {
-                        SB.AppendLine();
 
-                        SB.Append(ClassToString(Value));
+                        SB.AppendLine(ClassToString(Value));
                     }
                 }
                 else
                 {
-                    if (FieldType == typeof(byte)) SB.Append(((byte)Value).ToString("X2"));
-                    else if (FieldType == typeof(ushort)) SB.Append(((ushort)Value).ToString("X4"));
+                    if (FieldType == typeof(byte)) SB.AppendLine(((byte)Value).ToString("X2"));
+                    else if (FieldType == typeof(ushort)) SB.AppendLine(((ushort)Value).ToString("X4"));
                     else if (FieldType == typeof(uint))
                     {
                         uint value = (uint)Value;
@@ -249,11 +363,12 @@ namespace FindinFilesPlugin
 
                         if (!val.StartsWith("0x"))
                         {
-                            SB.Append(val + " [" + value.ToString("X8") + "]");
+                            SB.AppendLine(val);
+                            SB.AppendLine(value.ToString("X8"));
                         }
                         else
                         {
-                            SB.Append(val);
+                            SB.AppendLine(val);
                         }
                     }
                     else if (FieldType == typeof(int))
@@ -263,21 +378,25 @@ namespace FindinFilesPlugin
 
                         if (!val.StartsWith("0x"))
                         {
-                            SB.Append(val + " [" + value.ToString("X8") + "]");
+                            SB.AppendLine(val);
+                            SB.AppendLine(value.ToString("X8"));
                         }
                         else
                         {
-                            SB.Append(val);
+                            SB.AppendLine(val);
                         }
                     }
-                    else if (FieldType == typeof(ulong)) SB.Append(((ulong)Value).ToString("X16"));
-                    else if (FieldType == typeof(float)) SB.Append(((float)Value).ToString());
-                    else if (FieldType == typeof(double)) SB.Append(((double)Value).ToString());
-                    else SB.Append(Value.ToString());
+                    else if (FieldType == typeof(ulong)) SB.AppendLine(((ulong)Value).ToString("X16"));
+                    else if (FieldType == typeof(float)) SB.AppendLine(((float)Value).ToString());
+                    else if (FieldType == typeof(double)) SB.AppendLine(((double)Value).ToString());
+                    else SB.AppendLine(Value.ToString());
                 }
             }
 
             return SB.ToString();
         }
+
+        #endregion
+
     }
 }

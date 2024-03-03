@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:FindinFilesPlugin.Windows"
         xmlns:core="clr-namespace:Frosty.Core.Controls;assembly=FrostyCore"
         xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
+        xmlns:root="clr-namespace:FindinFilesPlugin"
         mc:Ignorable="d"
-        Title="Find in Files" Height="450" Width="450"
+        Title="Find in Files" Height="550" Width="500"
         x:Name="FindinFilesWindows">
     
     <Window.Resources>
@@ -17,6 +18,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
+
 
     <Grid Background="{StaticResource ListBackground}">
         <Grid.RowDefinitions>
@@ -34,7 +36,7 @@
             </Grid>
             <DockPanel LastChildFill="True">
                 <CheckBox x:Name="isCaseSensitive" Margin="1" VerticalAlignment="Center"/>
-                <Label Content="Match case"/>
+                <Label Content="Case Sensitive"/>
             </DockPanel>
             <DockPanel LastChildFill="True">
                 <CheckBox x:Name="isMatchWholeWord" Margin="1" VerticalAlignment="Center"/>
@@ -68,6 +70,27 @@
                     </DockPanel>
                 </WrapPanel>
             </DockPanel>
+            
+            <!-- Index Library -->
+            <DockPanel LastChildFill="True">
+                <Label Content="Index" Width="75"/>
+
+                <WrapPanel Margin="1">
+                    <!--<Button x:Name="IndexButton" Margin="2.5" Width="80" Click="IndexButton_Click" Content="{Binding Source={x:Static root:IndexLibrary.isIndexInitialized}, Converter={StaticResource isIndexInitializedToStringConverter}}"/>-->
+                    <Button x:Name="IndexButton" Margin="2.5" Width="80" Click="IndexButton_Click">
+                        <Button.Content>
+                            <!-- User should not see this loading and i make this because the fucking binding cannot update -->
+                            <StackPanel Orientation="Horizontal">
+                                <ctrl:FrostySpinner Height="15"/>
+                                <TextBlock Text="Loading" Height="15"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                    <Button x:Name="SaveIndexButton" Margin="2.5" Width="75" Click="SaveIndexButton_Click" IsEnabled="False" Content="Save Index" ToolTip="Save index to file"/>
+                    <Button x:Name="LoadIndexButton" Margin="2.5" Width="75" Click="LoadIndexButton_Click" Content="Load Index" ToolTip="Load index from file"/>
+                </WrapPanel>
+            </DockPanel>
+
         </StackPanel>
 
         <!-- Result list -->
@@ -96,7 +119,6 @@
             <Button x:Name="FindAllButton" DockPanel.Dock="Right" Margin="5, 8, 8, 8" Width="60" Content="Find All" Click="FindAllButton_Click"/>
             <Button x:Name="FindNextButton" DockPanel.Dock="Right" Margin="5, 8, 5, 8" Width="65" Content="Find Next" Click="FindNextButton_Click"/>
             <Button x:Name="ExportButton" DockPanel.Dock="Right" Margin="5, 8, 5, 8" Width="80" Content="Export to file" Click="ExportButton_Click"/>
-
             <!-- Always on top -->
             <ToggleButton Margin="8" Width="100" DockPanel.Dock="Left" Content="Always On Top" IsChecked="{Binding ElementName=FindinFilesWindows, Path=Topmost}"/>
         </DockPanel>
