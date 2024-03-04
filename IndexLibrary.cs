@@ -300,7 +300,7 @@ namespace FindinFilesPlugin
                     object Value = PI.GetValue(Obj);
                     string Tmp = "";
 
-                    SB.Append(FieldToString(Value, ref Tmp));
+                    SB.AppendLine(FieldToString(Value, ref Tmp));
 
                     SB = SB.Replace("[AddInfo]", Tmp);
                 }
@@ -330,8 +330,6 @@ namespace FindinFilesPlugin
 
                 if (Count > 0)
                 {
-                    SB.AppendLine();
-
                     for (int i = 0; i < Count; i++)
                     {
                         SB.AppendLine(i.ToString());
@@ -339,9 +337,7 @@ namespace FindinFilesPlugin
                         object SubValue = FieldType.GetMethod("get_Item").Invoke(Value, new object[] { i });
                         string Tmp = "";
 
-                        SB.Append(FieldToString(SubValue, ref Tmp));
-
-                        SB.AppendLine();
+                        SB.AppendLine(FieldToString(SubValue, ref Tmp));
                     }
                 }
             }
