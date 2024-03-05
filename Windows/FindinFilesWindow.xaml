@@ -31,7 +31,7 @@
         <StackPanel Grid.Row="0" Margin="5">
             <!-- Basic search settings -->
             <Grid>
-                <TextBox x:Name="Find_TextBox" Margin="2" BorderThickness="1" MinHeight="25" TextChanged="Find_TextBox_TextChanged"/>
+                <TextBox x:Name="Find_TextBox" Margin="2" BorderThickness="1" MinHeight="25" TextChanged="Find_TextBox_TextChanged" AllowDrop="True"/>
                 <Label x:Name="Find_TextBox_Watermark" Margin="2.5, 0, 0, 0" Content="Find" VerticalAlignment="Center" Opacity="0.5" IsHitTestVisible="False" Visibility="Visible"/>
             </Grid>
             <DockPanel LastChildFill="True">
@@ -45,6 +45,13 @@
             <DockPanel LastChildFill="True">
                 <CheckBox x:Name="isRegularExpressions" Margin="1" VerticalAlignment="Center"/>
                 <Label Content="Use regular expressions"/>
+            </DockPanel>
+
+            <!-- Look in -->
+            <!-- I have this idea but I don't know how to implement it. If you are interested you can submit a PR on GitHub or contact Discord: shoushou1106 -->
+            <DockPanel LastChildFill="True">
+                <Label Content="Look in" Width="75"/>
+                <TextBox x:Name="LookIn_TextBox" Margin="2" BorderThickness="1" MinHeight="25"/>
             </DockPanel>
 
             <!-- File type -->
@@ -94,7 +101,7 @@
         </StackPanel>
 
         <!-- Result list -->
-        <core:FrostyAssetListView x:Name="ResultAssetListView" Grid.Row="1" Margin="0 0 3 0" BorderThickness="1" BorderBrush="{StaticResource WindowBackground}"
+        <core:FrostyAssetListView x:Name="ResultAssetListView" Grid.Row="1" Margin="2, 0, 2, 0" BorderThickness="1" BorderBrush="{StaticResource WindowBackground}"
                                   SelectedAssetDoubleClick="ResultAssetListOpenItem_Click">
             <core:FrostyAssetListView.AssetContextMenu>
                 <ContextMenu>

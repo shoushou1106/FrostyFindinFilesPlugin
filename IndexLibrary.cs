@@ -35,7 +35,7 @@ namespace FindinFilesPlugin
         /// Use LINQ search
         /// </summary>
         /// <param name="Key">Search Key Word</param>
-        public async static void SetEnumerateSearch(string Key, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions)
+        public async static void SetEnumerateSearch(string Key, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions, bool lookIn)
         {
             await Task.Run(() =>
             {
@@ -86,7 +86,7 @@ namespace FindinFilesPlugin
         /// Use foreach search all
         /// </summary>
         /// <param name="Key">Search Key Word</param>
-        public static List<EbxAssetEntry> SearchAll(string Key, CancellationToken cancelToken, ILogger inLogger, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions)
+        public static List<EbxAssetEntry> SearchAll(string Key, CancellationToken cancelToken, ILogger inLogger, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions, string lookIn)
         {
             cancelToken.ThrowIfCancellationRequested();
             List<EbxAssetEntry> result = new List<EbxAssetEntry>();
