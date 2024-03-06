@@ -35,7 +35,7 @@ namespace FindinFilesPlugin
         /// Use LINQ search
         /// </summary>
         /// <param name="Key">Search Key Word</param>
-        public async static void SetEnumerateSearch(string Key, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions, bool lookIn)
+        public async static void SetEnumerateSearch(string Key, bool isCaseSensitive, bool isMatchWholeWord, bool isRegularExpressions, string lookIn)
         {
             await Task.Run(() =>
             {
@@ -65,6 +65,7 @@ namespace FindinFilesPlugin
                     {
                         EnumerateResult =
                             from entry in App.AssetManager.EnumerateEbx()
+                            where entry.Path.StartsWith(lookIn)
                             where Regex.IsMatch(EbxToString(entry), Key)
                             select entry;
                     }
@@ -75,6 +76,7 @@ namespace FindinFilesPlugin
 
                         EnumerateResult =
                             from entry in App.AssetManager.EnumerateEbx()
+                            where entry.Path.StartsWith(lookIn)
                             where Regex.IsMatch(EbxToString(entry), pattern, options)
                             select entry;
                     }
